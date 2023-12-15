@@ -1,6 +1,3 @@
-#include <cctype>
-#include <cassert>
-#include <iostream>
 #include "board.hpp"
 
 using std::cout; 
@@ -152,7 +149,6 @@ void Board::from_fen(std::string fen) {
 
         else if (mode == 2) {
             // Castling rights
-            cout << c << '\n';
             switch (c) {
                 case 'K':
                     castling ^= 1;
@@ -187,10 +183,107 @@ void Board::from_fen(std::string fen) {
     }
 }
 
+void show_bitboard(bitboard bb) {
+    // Utility function for displaying bitboards in a more human readable way
+    cout << '\n';
+    for (int rank = 7; rank >= 0; rank--) {
+        for (int file = 0; file < 8; file++) {
+            if (bb & set_bit((8*rank + file))) 
+                cout << " 1";
+            else 
+                cout << " 0";
+        }
+        cout << '\n';
+    }
+    cout << '\n';
+}
+
+void Board::init_board_masks() {
+    ranks[0] = 0x00000000000000FF;
+    for (int i = 1; i < 8; i++) 
+        ranks[i] = ranks[i-1] << 8;
+    
+
+    files[0] = 0x0101010101010101;
+    for (int i = 1; i < 8; i++) 
+        files[i] = files[i-1] << 1;
+
+}
+
+void Board::init_pawn_bitboards() {
+    bitboard pawn;
+    bitboard targets;
+    for (int i = 0; i < 64; i++) {
+        targets = 0ULL;
+        pawn = set_bit(i);
+
+        targets ^= pawn << 8;
+        targets ^= (pawn & ranks[1]) << 16;
+        targets ^= (pawn & ~files[7]) << 9;
+        targets ^= (pawn & ~files[0]) << 7;
+        white_pawn_moves[i] = targets;
+
+        targets = 0ULL;
+        targets ^= pawn >> 8;
+        targets ^= (pawn & ranks[6]) >> 16;
+        targets ^= (pawn & ~files[0]) >> 9;
+        targets ^= (pawn & ~files[7]) >> 7;
+        black_pawn_moves[i] = targets;
+    }
+}
+
+void Board::init_knight_bitboards() {
+    bitboard knight;
+    bitboard targets;
+    for (int i = 0; i < 64; i++) {
+        targets = 0ULL;
+        knight = set_bit(i);
+        
+        targets ^= (knight & ~(files[0] | files[1] | ranks[7])) << 6;
+        targets ^= (knight & ~(files[6] | files[7] | ranks[7])) << 10;
+        targets ^= (knight & ~(files[0] | ranks[6] | ranks[7])) << 15;
+        targets ^= (knight & ~(files[7] | ranks[6] | ranks[7])) << 17;
+
+        targets ^= (knight & ~(files[6] | files[7] | ranks[0])) >> 6;
+        targets ^= (knight & ~(files[0] | files[1] | ranks[0])) >> 10;
+        targets ^= (knight & ~(files[7] | ranks[0] | ranks[1])) >> 15;
+        targets ^= (knight & ~(files[0] | ranks[0] | ranks[1])) >> 17;
+
+        knight_moves[i] = targets;
+    }
+}
+
+void Board::init_king_bitboards() {
+    bitboard king;
+    bitboard targets;
+
+    for (int i = 0; i < 64; i++) {
+        targets = 0ULL;
+        king = set_bit(i);
+
+        targets ^= (king & ~files[7]) << 1;
+        targets ^= (king & ~files[0]) >> 1;
+        targets ^= (king & ~ranks[7]) << 8;
+        targets ^= (king & ~ranks[0]) >> 8;
+
+        targets ^= (king & ~(ranks[7] | files[7])) << 9;
+        targets ^= (king & ~(ranks[7] | files[0])) << 7;
+        targets ^= (king & ~(ranks[0] | files[0])) >> 9;
+        targets ^= (king & ~(ranks[0] | files[7])) >> 7;
+
+        king_moves[i] = targets;
+    }
+}
+
 int main() {
     Board b;
     b.from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"); 
     b.show();
-    cout << "Hello, World!\n";
+
+    b.init_board_masks();
+    b.init_pawn_bitboards();
+    b.init_knight_bitboards();
+    b.init_king_bitboards();
+
     return 0;
 }

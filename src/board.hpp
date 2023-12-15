@@ -1,4 +1,7 @@
 #include <array>
+#include <cctype>
+#include <cassert>
+#include <iostream>
 #include <string>
 
 #define set_bit(x) (1ULL << x)
@@ -12,10 +15,17 @@ enum pieces {
     p, n, b, r, q, k, all
 };
 
+void show_bitboard(bitboard bb);
+
 class Board {
     public:
         void show();
         void from_fen(std::string fen);
+        void init_board_masks();
+
+        void init_pawn_bitboards();
+        void init_knight_bitboards();
+        void init_king_bitboards();
 
     private:
         std::array<bitboard, 14> pieces;
@@ -25,4 +35,15 @@ class Board {
         // square indexing because en passant can never happen on the a1 square
         // and allows en_passant to be used like a boolean
         int en_passant = 0; 
+
+        std::array<bitboard, 64> white_pawn_moves;
+        std::array<bitboard, 64> black_pawn_moves;
+        std::array<bitboard, 64> knight_moves;
+        std::array<bitboard, 64> king_moves;
+
+        std::array<bitboard, 8> files;
+        std::array<bitboard, 8> ranks;
+
+
+
 };
