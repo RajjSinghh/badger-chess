@@ -19,6 +19,8 @@ void show_bitboard(bitboard bb);
 
 class Board {
     public:
+        Board();
+        Board(std::string fen);
         void show();
         void from_fen(std::string fen);
         void init_board_masks();
@@ -31,6 +33,7 @@ class Board {
         std::array<bitboard, 14> pieces;
         short to_move; // 0 if white, 1 if black
         short castling = 0; // bit 0 is K, bit 1 is Q, bit 2 is k, bit 3 is q
+
         // square of en_passant, or 0 if unavailable. This doesn't affect 
         // square indexing because en passant can never happen on the a1 square
         // and allows en_passant to be used like a boolean
@@ -43,7 +46,4 @@ class Board {
 
         std::array<bitboard, 8> files;
         std::array<bitboard, 8> ranks;
-
-
-
 };

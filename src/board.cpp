@@ -2,6 +2,26 @@
 
 using std::cout; 
 
+Board::Board() {
+    from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    show();
+
+    init_board_masks();
+    init_pawn_bitboards();
+    init_knight_bitboards();
+    init_king_bitboards();
+}
+
+Board::Board(std::string fen) {
+    from_fen(fen);
+    show();
+
+    init_board_masks();
+    init_pawn_bitboards();
+    init_knight_bitboards();
+    init_king_bitboards();
+}
+
 void Board::show() {
     cout << '\n';
     int square;
@@ -26,7 +46,6 @@ void Board::show() {
             else cout << " .";
         }
         cout << '\n';
-
     }
     cout << '\n';
     cout << ((to_move == 0) ? "White's move" : "Black's move") << '\n';
@@ -134,9 +153,8 @@ void Board::from_fen(std::string fen) {
                     break;
             }
 
-            if (isdigit(c)) {
+            if (isdigit(c))
                 board_idx += c - '0';
-            }
         }
 
         else if (mode == 1) {
@@ -276,14 +294,6 @@ void Board::init_king_bitboards() {
 }
 
 int main() {
-    Board b;
-    b.from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"); 
-    b.show();
-
-    b.init_board_masks();
-    b.init_pawn_bitboards();
-    b.init_knight_bitboards();
-    b.init_king_bitboards();
-
+    Board b("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2");
     return 0;
 }
